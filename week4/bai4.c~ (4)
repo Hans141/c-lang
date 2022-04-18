@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdio_ext.h>
+#include "jval.h"
+#include "jrb.h"
+
+int main()
+{
+  JRB book,tmp;
+  char *name;
+  long sdt;
+  int n;
+  printf("Ban muon nhap bao nhieu nguoi:");
+  scanf("%d",&n);
+  for(int i=0;i<n;i++)
+    {
+      printf("Ten:);
+      __fpurge(stdin);
+      gets(name);
+      __fpurge(stdin);
+      printf("SDT:");
+      scanf("%ld",&sdt);
+      tmp=jrb_find_str(book,name,sdt);
+      if(tmp==NULL)
+	jrb_insert_str(book,name,new_jval_l(sdt));
+      else
+	tmp->val=new_jval_l(sdt);
+    }
+  jrb_traverse(book,tmp)
+    printf("%s %ld\n",jval_s(tmp->key),jval_l(tmp->value));
+  printf("Ban muon tim kiem ten nao:);
+  __fpurge(stdin);
+  gets(name);
+  __fpurge(stdin);
+  tmp=jrb_find_str(book,name);
+  if(tmp==NULL)
+    printf("Khong co\n");
+  else
+    printf("%s: %ld\n",name,jval_l(tmp->value));
+  jrb_free_tree(book);
+}

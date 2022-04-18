@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <stdio_ext.h>
+#define INITIAL_SIZE 100
+#define INCREMENTAL_SIZE 10
+#define MaxName 80
+
+typedef struct
+{
+  long number;
+  char name[MaxName];
+}PhoneEntry;
+
+typedef struct
+{
+  PhoneEntry *entries;
+  int total;
+  int size
+}PhoneBook;
+
+PhoneBook createPhoneBook()
+{
+  PhoneBook book;
+  book.entries=(PhoneEntry*)malloc(INITIAL_SIZE*sizeof(PhoneEntry));
+  size=INITIAL_SIZE;
+  return book
+}
+
+void dropPhoneBook(PhoneBook* book)
+{
+  free(book->entries);
+}
+
+void addPhoneNumber(char *name,long number,PhoneBook* book)
+{
+  int i,done;
+  done=0;
+  for(i=0;i<book->total;i++)
+    {
+      if(strcmp(name,book->entries[i].name)==0)
+	{
+	  book->entries[i].number=number;
+	  done=1;
+	}
+    }
+  if(done==0&&book->total<MAX_PHONE_NUMBER)
+    {
+      book->entries[book->total].number=number;
+      strcpy(book->entries[book->total].name,name);
+      book->total++;
+    }
+  else
+    if(book->total==MAX_PHONE_NUMBER)
+      {
+      book->entries=(*PhoneEntry)realloc(book->entries,(size+INCREMENTAL_SIZE)*sizeof(PhoneEntry));
+  
+book->entries[book->total].number=number;
+      strcpy(book->entries[book->total].name,name);
+      book->total++;
+      }
+}
+char *getPhoneNumber(long number, PhoneBook* book)
+{
+  int i;
+  for(i=0;i<book->total;i++)
+    {
+      if(number==book->entries[i].number)
+	return book->entries[i].name;
+    }
+  return NULL;
+}
+
+int main()
+{}

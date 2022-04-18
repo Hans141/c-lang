@@ -1,0 +1,57 @@
+#include <stdio.h>
+#define MaxName 80
+#define MAX_PHONE_NUMBER 1000
+
+typedef struct
+{
+  long number;
+  char name[MaxName];
+}PhoneEntry;
+
+typedef struct
+{
+  PhoneEntry entries[MAX_PHONE_NUMBER];
+  int total;
+}PhoneBook;
+/*
+PhoneEntry *getPhoneEntry(char* name, const PhoneBook* book)
+{
+  int i;
+  for(i=0;i<MAX_PHONE_NUMBER;i++)
+    {
+      if(strcmp(name,book->entries[i].name)==0)
+	return book->entries[i];
+    }
+  return NULL;
+}
+*/
+void addPhoneNumber(long number,char *name,PhoneBook* book)
+{
+  int i,done;
+  done=0;
+  for(i=0;i<book->total;i++)
+    {
+      if(strcmp(name,book->entries[i].name)==0)
+	{
+	  book->entries[i].number=number;
+	  done=1;
+	}
+    }
+  if(done==0)
+    {
+      book->entries[book->total].number=number;
+      strcpy(book->entries[book->total].name,name);
+      total++;
+    }
+  
+}
+char *getPhoneNumber(long number, const PhoneBook* book)
+{
+  int i;
+  for(i=0;i<book->total;i++)
+    {
+      if(number==book->entries[i].number)
+	return book->entries[i].name;
+    }
+  return NULL;
+}

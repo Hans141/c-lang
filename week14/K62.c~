@@ -1,0 +1,199 @@
+#include "cgraphv1.h"
+#include <stdio_ext.h>
+#include <stdlib.h>
+#define Max_Str 100
+
+int menuVaLuaChon(int a,int b)
+{
+  int luaChon,buff;
+  char c;
+  printf("+-----+--------------------------------------------------+\n");
+  printf("|%25s%6s%25s|\n","","MENU","");
+  printf("+-----+--------------------------------------------------+\n");
+  printf("|%5d|%-50s|\n",1,"Y nghia");
+  printf("|%5d|%-50s|\n",2,"Y nghia");
+  printf("|%5d|%-50s|\n",3,"Y nghia");
+  printf("|%5d|%-50s|\n",4,"Y nghia");
+  printf("|%5d|%-50s|\n",5,"Y nghia");
+  printf("|%5d|%-50s|\n",6,"Thoat");
+  printf("+-----+--------------------------------------------------+\n");
+
+  do
+    {
+      __fpurge(stdin);
+      printf("Nhap vao lua chon cua ban:");
+      buff=scanf("%d%c",&luaChon,&c);
+      if(buff!=2&&c!='\n'||luaChon<a||luaChon>b) printf("Ban da nhap sai cu phap\n");
+    }while(buff!=2&&c!='\n'||luaChon<a||luaChon>b);
+  return luaChon;
+}
+
+int docFileSanPham(char *tenFile, JRB caySanPham)
+{
+  FILE* f;
+  f=fopen(tenFile,"r");
+  if(f==NULL)
+    {
+      printf("File open failed!\n");
+      exit(1);
+    }
+  int n;
+  int id;
+  char str[Max_Str];
+  fscanf(f,"%d%*c",&n);
+  for(int i=0;i<n;i++)
+    {
+      fscanf(f,"%s %d\n",str,&id);
+      jrb_insert_int(caySanPham,id,new_jval_s(strdup(str)));
+    }
+  fclose(f);
+  return n;
+}
+
+char *my_itoa(int num, char *str)
+{
+        if(str == NULL)
+        {
+                return NULL;
+        }
+        sprintf(str, "%d", num);
+        return str;
+}
+
+int docFileKhoHang(char *tenFile, JRB cayKhoHang, Graph g, int n)
+{
+
+   FILE* f;
+  f=fopen(tenFile,"r");
+  if(f==NULL)
+    {
+      printf("File open failed!\n");
+      exit(1);
+    }
+  int m;
+  int id;
+  char str[Max_Str];
+  int idSP,soLuong;
+  char buff[20];
+  // JRB tree;
+  JRB nodeTest,nodeTest2,tree2;
+  fscanf(f,"%d%*c",&m);
+  JRB node2,node5;
+  for(int i=0;i<m;i++)
+    {
+      fscanf(f,"%s %d\n",str,&id);
+      addVertex(g,id,str);
+      JRB tree=make_jrb();
+      for(int j=0;j<n;j++)
+	{
+	  fscanf(f,"%d %d\n",&idSP,&soLuong);
+	  jrb_insert_int(tree,idSP,new_jval_i(soLuong));
+	}
+      jrb_insert_int(cayKhoHang,id,new_jval_v(tree));
+      node5=jrb_find_int(cayKhoHang,id);
+      tree=(JRB) jval_v(node5->val);
+      jrb_traverse(node2,tree)
+	printf("Da them vao id:%d voi key =%d, val=%d\n",jval_i(node5->key),jval_i(node2->key),jval_i(node2->val));
+      free(tree);
+    }
+  //test
+  
+  JRB node,tree;
+  tree=make_jrb();
+    jrb_traverse(node,cayKhoHang)
+    {
+      printf("%d\n",jval_i(node->key));
+      tree=(JRB)jval_v(node->val);
+      jrb_traverse(node2,tree)
+      printf("%d %d\n",jval_i(node2->key),jval_i(node2->val));
+    }
+    
+  int soCanh;
+  int id1,id2;
+  double khoangCach;
+  fscanf(f,"%d%*c",&soCanh);
+  for(int k=0;k<soCanh;k++)
+    {
+      fscanf(f,"%d %d %lf\n",&id1,&id2,&khoangCach);
+      addEdge(g,id1,id2,khoangCach);
+    }
+  fclose(f);
+  return m;
+}
+
+char *layTenSanPham(JRB caySanPham, int id)
+{
+  JRB node=jrb_find_int(caySanPham,id);
+  return jval_s(node->val);
+}
+int main()
+{
+  JRB caySanPham=make_jrb();
+  JRB cayKhoHang=make_jrb();
+  Graph g=createGraph(UNDIRECT_GRAPH);
+  JRB node,node2,node3;
+  JRB tree;
+  int idKho1,idKho2;
+  int thoat,luaChon;
+  thoat=0;
+  int n=docFileSanPham("sanpham.txt",caySanPham);
+  int m=docFileKhoHang("khohang.txt",cayKhoHang,g,n);
+  do
+    {
+      luaChon= menuVaLuaChon(1,6);
+      switch(luaChon)
+	{
+	case 1:
+	  //ham1
+	  printf("C-Advanced,HK20182\n");
+	    break;
+	case 2:
+	  //ham2
+	  jrb_traverse(node,caySanPham)
+	    printf("%s %d\n",jval_s(node->val),jval_i(node->key));
+	  break;
+	case 3:
+	  //ham3
+	  printf("Nhap vao id1:");
+	  scanf("%d",&idKho1);
+	  printf("Nhap vao id2:");
+	  scanf("%d",&idKho2);
+	  if(jrb_find_int(cayKhoHang,idKho1)==NULL||jrb_find_int(cayKhoHang,idKho2)==NULL)
+	    {
+	      printf("-1\n");
+	      break;
+	    }
+	  if(hasEdge(g,idKho1,idKho2))
+	    {
+	      printf("%.5lf km\n",getEdgeValue(g,idKho1,idKho2));
+	      break;
+	    }
+	  printf("-1\n");	    
+	  break;
+	case 4:
+	  //ham4
+	  jrb_traverse(node,g.vertices)
+	    {
+	      printf("%s\n",jval_s(node->val));
+	      node3=jrb_find_int(cayKhoHang,jval_i(node->key));
+	      printf("id:%d\n",jval_i(node->key));
+	      tree=(JRB)jval_v(node3->val);
+	      jrb_traverse(node2,tree)
+		{
+		  printf("%d %d\n",jval_i(node2->key),jval_i(node2->val));
+		}
+	    }
+	  break;
+	case 5:
+	  //ham55
+	  break;
+	case 6:
+	  thoat=1;
+	  dropGraph(g);
+	  free(caySanPham);
+	  free(cayKhoHang);
+	  break;
+	}	
+    }while(thoat!=1);
+}
+ 

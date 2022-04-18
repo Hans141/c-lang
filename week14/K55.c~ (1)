@@ -1,0 +1,329 @@
+#include <stdio.h>
+#include "jrb.h"
+#include "jval.h"
+#include "dllist.h"
+#include <string.h>
+#include <stdlib.h>
+#define Max_String 1000
+#define INFINITIVE_VALUE 1000
+
+typedef struct
+{
+  JRB edges;
+  JRB vertices;
+}Graph;
+
+//int lastNodeID=0;
+Graph createGraph()
+{
+   Graph g; 
+   g.edges = make_jrb();  
+   g.vertices = make_jrb();  
+   return g;
+}
+
+void addVertex(Graph g, int id, char* letter)
+{
+     JRB node = jrb_find_int(g.vertices, id);
+     if (node==NULL) // only add new vertex 
+         jrb_insert_int(g.vertices, id, new_jval_s(letter));            
+}
+
+int getVertex(Graph g, int id)
+{
+     JRB node = jrb_find_int(g.vertices, id);
+     if (node==NULL) 
+        return 0;
+     else                
+        return jval_i(node->val);
+}     
+
+int getEdgeValue(Graph graph, int v1, int v2)
+{
+    JRB node, tree;
+    node = jrb_find_int(graph.edges, v1);
+    if (node==NULL)
+       return INFINITIVE_VALUE;
+    tree = (JRB) jval_v(node->val);
+    node = jrb_find_int(tree, v2);
+    if (node==NULL)
+       return INFINITIVE_VALUE;
+    else
+       return jval_i(node->val);       
+}
+
+void addEdge(Graph graph, int v1, int v2, int weight)
+{
+     JRB node, tree;
+     if (getEdgeValue(graph, v1, v2)==INFINITIVE_VALUE)
+     {
+        node = jrb_find_int(graph.edges, v1);
+        if (node==NULL) {
+           tree = make_jrb();
+           jrb_insert_int(graph.edges, v1, new_jval_v(tree));
+        } else
+        {
+           tree = (JRB) jval_v(node->val);   
+        }
+        jrb_insert_int(tree, v2, new_jval_i(weight));
+     }
+}
+int indegree (Graph graph, int v, int* output)
+{
+    JRB tree, node;
+    int total = 0;   
+    jrb_traverse(node, graph.edges)
+    {
+       tree = (JRB) jval_v(node->val);
+       if (jrb_find_int(tree, v))
+       {
+          output[total] = jval_i(node->key);
+          total++;
+       }                
+    }
+    return total;   
+}
+
+int outdegree (Graph graph, int v, int* output)
+{
+    JRB tree, node;
+    int total;
+    node = jrb_find_int(graph.edges, v);
+    if (node==NULL)
+       return 0;
+    tree = (JRB) jval_v(node->val);
+    total = 0;   
+    jrb_traverse(node, tree)
+    {
+       output[total] = jval_i(node->key);
+       total++;                
+    }
+    return total;   
+}
+
+void dropGraph(Graph graph)
+{
+    JRB node, tree;
+    jrb_traverse(node, graph.edges)
+    {
+        tree = (JRB) jval_v(node->val);
+        jrb_free_tree(tree);
+    }
+    jrb_free_tree(graph.edges);
+    jrb_free_tree(graph.vertices);
+}
+
+
+int DAG(Graph graph)
+{
+   int visited[1000];
+   int n, output[100], i, u, v, start;
+   Dllist node, stack;
+   JRB vertex;
+   
+   jrb_traverse(vertex, graph.vertices)
+   {
+       memset(visited, 0, sizeof(visited));
+
+       start = jval_i(vertex->key);              
+       stack = new_dllist();
+       dll_append(stack, new_jval_i(start));
+    
+       while ( !dll_empty(stack) )
+       {
+          node = dll_last(stack);
+          u = jval_i(node->val);
+          dll_delete_node(node);
+          if (!visited[u])
+          {
+              visited[u] = 1;
+              n = outdegree(graph, u, output);
+              for (i=0; i<n; i++)
+              {
+                  v = output[i];
+                  if ( v == start ) // cycle detected 
+                     return 0;
+                  if (!visited[v])    
+                     dll_append(stack, new_jval_i(v));
+              }
+          }           
+       }
+   }
+   return 1; // no cycle    
+}
+
+void deleteEdge(Graph graph, int v1,int v2)
+{
+  JRB node,node2;
+  if(getEdgeValue(graph,v1,v2)==INFINITIVE_VALUE)
+    return;
+  else
+    {
+      JRB tree;
+      node=jrb_find_int(graph.edges,v1);
+      tree=(JRB) jval_v(node->val);
+      node2=jrb_find_int(tree,v2);
+      jrb_delete_node(node2);
+    }
+}
+/*
+void topologicalSort(Graph g, int output[], int* n)
+{
+  Dllist queue;
+  JRB node,node2;
+  int OUT[100],OUT2[100];
+  int totalOut;
+  int t;
+  int giaTri;
+  t=0;
+  Dllist dlltmp;
+  queue=new_dllist();
+  //duyet va cho tat ca nhung indegree=0 vao queue
+  jrb_traverse(node,g.vertices)
+    if(indegree(g,jval_i(node->key),OUT)==0)
+      dll_append(queue,node->key);
+  
+  while(!dll_empty(queue))
+    {
+      dlltmp=dll_first(queue); 
+      output[t]=jval_i(dlltmp->val);
+      t++;
+      totalOut=outdegree(g,jval_i(dlltmp->val),OUT);
+      giaTri=jval_i(dlltmp->val);
+       dll_delete_node(dlltmp);
+      for(int i=0;i<totalOut;i++)
+	{
+	  // node2=jrb_find_int(g.edges,OUT[i]);
+	  deleteEdge(g,giaTri,OUT[i]);
+	  if(indegree(g,OUT[i],OUT2)==0)
+	    dll_append(queue,new_jval_i(OUT[i]));
+	}
+    }
+  *n=t;
+}
+*/
+
+int layIDTuTen(Graph g, char *ten)
+{
+  JRB node;
+  jrb_traverse(node, g.vertices)
+    {
+      printf("%s %s\n",ten,jval_s(node->val));
+      if(strcmp(ten,jval_s(node->val))==0)
+	{
+	  printf("%s %s\n",ten,jval_s(node->val));
+	  return jval_i(node->key);
+	}
+    }
+  return -1;
+}
+
+int loadFile(char* s, Graph g)
+{
+  FILE *f;
+  char *fptr;
+  int i;
+  int idCon;
+  int idCha;
+  char name[Max_String];
+  char str[Max_String];
+  int lastNodeID=0;
+  f=fopen(s,"r");
+  if(f==NULL)
+    {
+      printf("File open failed\n");
+      return -1;
+    }
+  else
+    {
+      fptr=fgets(str,Max_String, f);
+      while(fptr!=NULL)
+	{
+	  str[strlen(str)-1]='\0';
+	  if(feof(f))
+	    return lastNodeID;
+	  
+	  //  printf("1\n");
+	      strncpy(name,str,2);
+	      name[2]='\0';
+	      printf("%s\n",name);
+	      idCon =layIDTuTen(g,name);
+	      printf("ID %d\n",idCon);
+	      if(idCon==-1)
+		{
+		  addVertex(g,lastNodeID,name);
+		  //printf(".\n");
+		  lastNodeID++;
+		}
+	      idCon=layIDTuTen(g,name);
+	      printf("%d %s\n",idCon,name);
+	      strcpy(str,&str[3]);
+	      if(str[0]!='A')
+		{
+		  printf("Da next\n");
+		  fptr=fgets(str,Max_String, f);
+		  continue;
+	        }
+	      //  printf("%s\n",str);
+	    
+	      const char s[2] = " ";
+	      char *token;
+	      token = strtok(str, s);
+	      while( token != NULL )
+		{
+		  const char ss[2] = "-";
+		  char *token2;
+		  token2 = strtok(token, ss);
+		  while( token2 != NULL )
+		    {
+		      if(token2[0]=='A')
+			{
+			  idCha=layIDTuTen(g,token2);
+			  printf("%s\n",token2);
+			  if(idCha==-1)
+			    {
+			      addVertex(g,lastNodeID,token2);
+			      // printf(".\n");
+			      lastNodeID++;
+			    }
+			  idCha=layIDTuTen(g,token2);
+			}
+		      
+		      else
+			{
+			  int trongSo=atoi(token2);
+			  printf("%d giua %d %d\n",trongSo,idCha,idCon);
+			  addEdge(g,idCha,idCon,trongSo);
+			}
+		      token2 = strtok(NULL, ss);
+		    }
+		  token = strtok(NULL, s);
+		}
+	      fptr=fgets(str,Max_String, f);
+	}
+    }
+  fclose(f);
+  return lastNodeID;
+}
+
+
+int main()
+{
+  int i;
+  int n;
+  int output[100];
+  Graph g = createGraph();
+ int last= loadFile("file.txt",g);
+ printf("%d\n",last);
+  /*
+   if (!DAG(g))
+   {
+     printf("Can not make topological sort\n");
+     return 1;
+   }
+  topologicalSort(g,output,&n);
+  printf("The topological order:\n");
+   for (i=0; i<n; i++)
+   printf("%s\n", getVertex(g,output[i]));
+  */
+}

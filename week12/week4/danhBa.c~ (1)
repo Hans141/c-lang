@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdio_ext.h>
+#include "jval.h"
+#include "jrb.h"
+#include <string.h>
+#define MaxName 20
+
+void loadFile(String tenFile,JRB book)
+{
+  FILE *fptr;
+  char *ten;
+  long sdt;
+  fptr=fopen(tenFile,"r");
+  while(fscanf("%s\t%ld\n",ten,&sdt)!=0)
+    {
+      jrb_insert_str(book,strdub(ten),jval_l(sdt));
+    }
+}
+
+void saveFile(String tenFile,JRB book)
+{
+  JRB node;
+  FILE *fptr;
+  char *ten;
+  long sdt;
+  fptr=fopen(tenFile,"w");
+  jrb_traverse(node,book)
+    {
+      strcpy(ten,jval_s(node->key));
+      sdt=jval_l(node->val);
+      fprintf(fptr,"%s\t%ld\n",ten,sdt);
+    }
+}
+
+int main()
+{
+  JRB book,tmp;
+  char name[MaxName];
+  long sdt;
+  int n;
+  book=make_jrb();
+  loadFile("danhba.txt",book);
+  printf("Ban muon nhap bao nhieu nguoi:");
+  scanf("%d",&n);
+  for(int i=0;i<n;i++)
+    {
+      printf("Nguoi %d\n",i+1);
+      printf("Ten:");
+      __fpurge(stdin);
+      gets(name);
+      __fpurge(stdin);
+      printf("SDT:");
+      scanf("%ld",&sdt);
+      
+      tmp=jrb_find_str(book,name);
+      if(tmp!=NULL)
+	tmp->val=new_jval_l(sdt);
+      else
+	jrb_insert_str(book,strdup(name),new_jval_l(sdt));
+    }
+  printf("\nDanh sach:\n");
+  jrb_traverse(tmp,book)
+    printf("%s %ld\n",jval_s(tmp->key),jval_l(tmp->val));
+  
+  printf("Ban muon tim kiem ten nao:");
+  __fpurge(stdin);
+  gets(name);
+  __fpurge(stdin);
+  tmp=jrb_find_str(book,name);
+  if(tmp==NULL)
+    printf("Khong co\n");
+  else
+    printf("%s: %ld\n",name,jval_l(tmp->val));
+  saveFile("danhba.txt",book);
+  
+  jrb_traverse(tmp, book)
+    free(jval_s(tmp->key));
+  jrb_free_tree(book);
+}

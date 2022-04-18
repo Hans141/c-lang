@@ -1,0 +1,94 @@
+#include <stdio.h>
+#include <stdio_ext.h>
+#include <string.h>
+#include <stdlib.h>
+#define INITIAL_SIZE 100
+#define INCREMENTAL_SIZE 10
+
+typedef struct
+{
+  void *key;
+  void *value;
+}Entry;
+
+typedef struct
+{
+  Entry *entries;
+  int size,total;
+  Entry (*makeNode)(void*, void*);
+  int (*compare)(void*, void*);
+}SymbolTable;
+
+SymbolTable createSymbolTable(Entry (*makeNode)(void*, void*),int (*compare)(void*,void*))
+{
+  SymbolTable book;
+  book.entries=(Entry*)malloc(INITIAL_SIZE*sizeof(PhoneEntry));
+  book.size=INITIAL_SIZE;
+  book.total=0;
+  book->makeNode=makeNode;
+  book->compare=copare;
+  return book;
+}
+
+Entry makePhone(void *name,void* phone)
+{
+  Entry res;
+  res.key=strdub((char*)name);
+  res.value=malloc(sizeof(long));
+  memcpy(res.value,phone,sizeof(long));
+  return res;
+}
+
+int comparePhone(void *key1,void *key2)
+{
+  return strcmp((char*)key1,(char*)key2);
+}
+
+
+void dropPhoneBook(PhoneBook* book)
+{
+  free(book->entries);
+}
+
+
+void addEntry(void* key,void* value,SymbolTable* book)
+{
+  int i,done;
+  done=0;
+  for(i=0;i<book->total;i++)
+    {
+      if(book->comparePhone(key,book->entries[i].key)==0)
+	{
+	  book->entries[i]=book->makePhone(key,value);
+	  done=1;
+	}
+    }
+  if(done==0&&book->total<book->size)
+    {
+      book->entries[book->total]=book->makePhone(key,value);
+      book->total++;
+    }
+  else
+    if(book->total==book->size)
+      {
+     book->entries=(PhoneEntry*)realloc(book->entries,(book->size+INCREMENTAL_SIZE)*sizeof(PhoneEntry));
+  
+      book->size=book->size+INCREMENTAL_SIZE;
+      book->entries[book->total]=book->makePhone(key,value);
+      book->total++;
+      }
+}
+
+Entry* getEntry(void* key,SymbolTable book);
+{
+  int i;
+  for(i=0;i<book->total;i++)
+    {
+      if(book->comparePhone(key,book->entries[i].key)==0)
+	return book->comparePhone(key,book->entries[i].key);
+    }
+  else return NULL;
+}
+
+int main()
+{}

@@ -1,0 +1,11 @@
+**1 C và C++ là cùng một ngôn ngữ ?
+# 	Sai
+# 	Đúng
+**2 Câu hỏi 2 ?
+# 	Đáp án a
+# 	Đáp án b
+#	Đáp án c
+**1 Đâu là lệnh sử dụng để rẽ nhánh chương trình ?
+# 	If
+#	switch
+#	Cả hai lệnh trên

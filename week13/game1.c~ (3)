@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <string.h>
+#define SoPhanTu 9
+#define goal "123456780"
+
+char* a="293164705";
+
+char* sangTrai(char* a)
+{
+  char a[soPhanTu];
+  strcpy(a,xau);
+  for(i=0;i<soPhanTu;i++)
+    {
+      if(a[i]=='0')
+	break;
+    }
+  if(i==0||i==3||i==6)
+    return;
+  else
+    {
+      a[i]=a[i-1];
+      a[i-1]=0;
+    }
+  return a;
+}
+
+char* sangPhai(char* a)
+{
+  char a[soPhanTu];
+  strcpy(a,xau);
+  for(i=0;i<soPhanTu;i++)
+    {
+      if(a[i]=='0')
+	break;
+    }
+  if(i==2||i==5||i==8)
+    return;
+  else
+    {
+      a[i]=a[i+1];
+      a[i+1]=0;
+    }
+  return a;
+}
+
+char* xuongDuoi(char* xau)
+{
+  char a[soPhanTu];
+  strcpy(a,xau);
+  for(i=0;i<soPhanTu;i++)
+    {
+      if(a[i]=='0')
+	break;
+    }
+  if(i==6||i==7||i==8)
+    return;
+  else
+    {
+      a[i]=a[i+3];
+      a[i+3]=0;
+    }
+  return a;
+}
+
+char* lenTren(char* xau)
+{
+  char a[soPhanTu];
+  strcpy(a,xau);
+  for(i=0;i<soPhanTu;i++)
+    {
+      if(a[i]=='0')
+	break;
+    }
+  if(i==0||i==1||i==2)
+    return;
+  else
+    {
+      a[i]=a[i-3];
+      a[i-3]=0;
+    }
+  return a;
+}
+
+
+
+
+
+
